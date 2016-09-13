@@ -1,0 +1,6 @@
+Django==1.10.1
+argparse==1.2.1
+lxml==3.6.4
+pytz==2016.6.1
+soaplib==2.0.0b1
+wsgiref==0.1.2
