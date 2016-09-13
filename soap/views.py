@@ -48,7 +48,7 @@ soap_hola_mundo = HolaMundo.as_view()
 """
 
 from soaplib.core.service import rpc, DefinitionBase, soap
-from soaplib.core.model.primitive import String, Integer, Boolean
+from soaplib.core.model.primitive import String, Integer, Boolean, DateTime
 from soaplib.core.model.clazz import Array
 from soaplib.core import Application
 from soaplib.core.server.wsgi import Application as WSGIApplication
@@ -57,13 +57,19 @@ from django.http import HttpResponse
 
 class HelloWorldService(DefinitionBase):
 
-    @soap(String, Integer, _returns=Array(String))
-    def say_smello(self,name,times):
-        results = []
-        for i in range(0,times):
-            results.append('Hello, %s'%name)
-        return results
+    @soap(String, String, String, String)
+    def SpotsPorProductosAnunciante(self, codigo_Plaza, codigo_Vehiculo,
+            fechaDesde, fechaHasta):
+        return "defSpotsPorProductosAnunciante"
 
+    @soap(Integer, DateTime, DateTime, Integer, String, Integer, Integer,
+          String, String, Integer, String, String)
+    def EvaluacionSpotInfoCompletaPorProdAnunciante(self, Region, Fecha,
+            Minuto, CodigoTema, Tema, Duracion, Canal, Anunciante, Producto,
+            CodigoMaterial, Matrerial, LTargetRatingsInfo):
+        return "def EvaluacionSpotInfoCompletaPorProdAnunciante"
+
+    """
     @soap(String,_returns=Boolean)
     def xml(self,xml):
         result = xml
@@ -72,16 +78,18 @@ class HelloWorldService(DefinitionBase):
     @soap(String,_returns=String)
     def xml2(self,xml2):
         return xml2
-
+    """
 
 
 class DjangoSoapApp(WSGIApplication):
+
     csrf_exempt = True
 
     def __init__(self, services, tns):
-        """Create Django view for given SOAP soaplib services and
-tns"""
-
+        """
+        Create Django view for given SOAP soaplib services and
+        tns
+        """
         return super(DjangoSoapApp,
             self).__init__(Application(services, tns))
 
