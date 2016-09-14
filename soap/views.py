@@ -1,51 +1,3 @@
-"""
-from django.views.generic import TemplateView
-
-from soap import SoapView
-from soaplib.core.service import soap
-from soaplib.core.model.primitive import String, Integer
-
-# Create your views here.
-
-
-class Soap(TemplateView):
-
-    template_name = 'soap.html'
-
-    def get(self, request, *args, **kwargs):
-
-        from suds.client import Client
-        cliente1 = Client('http://localhost:8000/verify.wsdl')
-        #result = cliente1.service.request_verify("Dave", 5, "nada")
-        print cliente1.service
-
-
-class MySoapService(SoapView):
-    __tns__ = '[url]http://localhost:8000/verify.wsdl[/url]'
-
-    @soap(String, Integer, returns=String)
-    def request_verify(self, q, id, uri):
-        #Some Code
-        return 'some return'
-
-    @soap(String, Integer, Integer, Integer, returns=String)
-    def request_hola_mundo(self, nombre, num1, num2, num3, nombre2):
-        #Some Code
-        return 'HOLA MUNDO!'
-
-
-class HolaMundo(SoapView):
-    __tns__ = '[url]http://localhost:8000/hola.wsdl[/url]'
-
-    @soap(String, Integer, Integer, Integer, returns=String)
-    def request_hola_mundo(self, nombre, num1, num2, num3, nombre2):
-        #Some Code
-        return 'HOLA MUNDO!'
-
-
-my_soap_service = MySoapService.as_view()
-soap_hola_mundo = HolaMundo.as_view()
-"""
 
 from soaplib.core.service import rpc, DefinitionBase, soap
 from soaplib.core.model.primitive import String, Integer, Boolean, DateTime
@@ -53,6 +5,16 @@ from soaplib.core.model.clazz import Array
 from soaplib.core import Application
 from soaplib.core.server.wsgi import Application as WSGIApplication
 from django.http import HttpResponse
+from soaplib.core.model.clazz import ClassModel
+
+import models
+
+
+class PaisSerializer(ClassModel):
+
+    __namespace__ = 'pais'
+    descripcion = String
+    valor = String
 
 
 class HelloWorldService(DefinitionBase):
@@ -90,6 +52,29 @@ class HelloWorldService(DefinitionBase):
     @soap(Integer, _returns=Integer)
     def EjemploDeMetodo(self, numero):
         return (10 * numero)
+
+    @soap(_returns=Array(PaisSerializer))
+    def get_paises(self):
+        result = []
+        pais_serializer = PaisSerializer()
+        paises = models.Pais.objects.all()
+
+        for pais in paises:
+            pais_serializer.descripcion = pais.descripcion
+            pais_serializer.valor = pais.valor
+            result.append(pais_serializer)
+
+        return result
+
+    @soap(Integer, _returns=Array(String))
+    def get_pais(self, pais_id):
+        result = []
+        pais = models.Pais.objects.get(pk=pais_id)
+
+        result.append(pais.descripcion)
+        result.append(pais.valor)
+
+        return result
 
     """
     @soap(String,_returns=Boolean)

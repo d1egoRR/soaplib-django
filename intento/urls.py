@@ -22,9 +22,6 @@ from soap.views import my_soap_service
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    #url(r'^soap/', Soap.as_view()),
-    #url(r'^verify.wsdl', my_soap_service),
-    #url(r'^hola.wsdl', soap_hola_mundo),
     url(r'^soap/wsdl$', my_soap_service),
     url(r'^soap/$', my_soap_service),
 ]
