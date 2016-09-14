@@ -57,8 +57,9 @@ from django.http import HttpResponse
 
 class HelloWorldService(DefinitionBase):
 
-    #__tns__ = '[url]http://12.0.0.1:8000/soap/wsdl[/url]'
+    __tns__ = '[url]http://12.0.0.1:8000/soap/wsdl[/url]'
 
+    """
     @soap(String, Integer, _returns=Array(String))
     def say_hello(self, name, times):
         results = []
@@ -72,6 +73,7 @@ class HelloWorldService(DefinitionBase):
         for i in range(0, times):
             results.append('Bye, %s' % name)
         return results
+    """
 
     @soap(String, String, _returns=Array(String))
     def spots_por_productos_anunciante(self, codigo_plaza, codigo_vehiculo):
@@ -81,7 +83,8 @@ class HelloWorldService(DefinitionBase):
           String, String, Integer, String, String, _returns=Array(String))
     def EvaluacionSpotInfoCompletaPorProdAnunciante(self, Region, Fecha,
             Minuto, CodigoTema, Tema, Duracion, Canal, Anunciante, Producto,
-            CodigoMaterial, Matrerial, LTargetRatingsInfo):
+            CodigoMaterial, Matrerial, LTargetRatingsInfo,
+            _returns=Array(String)):
         return "def EvaluacionSpotInfoCompletaPorProdAnunciante"
 
     @soap(Integer, _returns=Integer)
