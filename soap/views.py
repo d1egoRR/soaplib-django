@@ -57,17 +57,36 @@ from django.http import HttpResponse
 
 class HelloWorldService(DefinitionBase):
 
-    @soap(String, String, String, String)
-    def SpotsPorProductosAnunciante(self, codigo_Plaza, codigo_Vehiculo,
-            fechaDesde, fechaHasta):
-        return "defSpotsPorProductosAnunciante"
+    #__tns__ = '[url]http://12.0.0.1:8000/soap/wsdl[/url]'
+
+    @soap(String, Integer, _returns=Array(String))
+    def say_hello(self, name, times):
+        results = []
+        for i in range(0, times):
+            results.append('Hello, %s' % name)
+        return results
+
+    @soap(String, Integer, _returns=Array(String))
+    def say_bye(self, name, times):
+        results = []
+        for i in range(0, times):
+            results.append('Bye, %s' % name)
+        return results
+
+    @soap(String, String, _returns=Array(String))
+    def spots_por_productos_anunciante(self, codigo_plaza, codigo_vehiculo):
+        return "def SpotsPorProductosAnunciante"
 
     @soap(Integer, DateTime, DateTime, Integer, String, Integer, Integer,
-          String, String, Integer, String, String)
+          String, String, Integer, String, String, _returns=Array(String))
     def EvaluacionSpotInfoCompletaPorProdAnunciante(self, Region, Fecha,
             Minuto, CodigoTema, Tema, Duracion, Canal, Anunciante, Producto,
             CodigoMaterial, Matrerial, LTargetRatingsInfo):
         return "def EvaluacionSpotInfoCompletaPorProdAnunciante"
+
+    @soap(Integer, _returns=Integer)
+    def EjemploDeMetodo(self, numero):
+        return (10 * numero)
 
     """
     @soap(String,_returns=Boolean)
