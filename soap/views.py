@@ -1,91 +1,73 @@
 
-from soaplib.core.service import rpc, DefinitionBase, soap
-from soaplib.core.model.primitive import String, Integer, Boolean, DateTime
-from soaplib.core.model.clazz import Array
-from soaplib.core import Application
-from soaplib.core.server.wsgi import Application as WSGIApplication
 from django.http import HttpResponse
-from soaplib.core.model.clazz import ClassModel
 
-import models
-
-
-class PaisSerializer(ClassModel):
-
-    __namespace__ = 'pais'
-    descripcion = String
-    valor = String
+from soaplib.core import Application
+from soaplib.core.model.clazz import Array, ClassModel
+from soaplib.core.model.primitive import (Boolean, DateTime, Double, Integer,
+                                          String)
+from soaplib.core.server.wsgi import Application as WSGIApplication
+from soaplib.core.service import DefinitionBase, soap
 
 
-class HelloWorldService(DefinitionBase):
+class SoapCredentials(ClassModel):
+    Cliente = String
+    Password = String
+
+
+class ExtensionDataObject(ClassModel):
+    SoapCredentials = SoapCredentials
+
+
+class TargetInfo(ClassModel):
+    ExtensionData = ExtensionDataObject
+    Codigo = Integer
+    Descripcion = String
+    Tipo = Integer
+
+
+class TargetRatingsInfo(ClassModel):
+    TargetInfo1 = TargetInfo
+    RatingPorc = Double
+    RatingMiles = Double
+
+
+class ArrayOfTargetRatingsInfo(ClassModel):
+    TargetRatingsInfo = TargetRatingsInfo
+
+
+class EvaluacionSpotInfoCompletaPorProdAnunciante(ClassModel):
+    Region = Integer
+    Fecha = DateTime
+    Minuto = DateTime
+    CodigoTema = Integer
+    Tema = String
+    Duracion = Integer
+    Canal = Integer
+    Anunciante = String
+    Producto = String
+    CodigoMaterial = Integer
+    Material = String
+    LTargetRatingsInfo = ArrayOfTargetRatingsInfo
+
+
+class ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante(ClassModel):
+    EvaluacionSpotInfoCompletaPorProdAnunciante = Array(
+                            EvaluacionSpotInfoCompletaPorProdAnunciante)
+
+
+class SOAPService(DefinitionBase):
 
     __tns__ = '[url]http://12.0.0.1:8000/soap/wsdl[/url]'
 
-    """
-    @soap(String, Integer, _returns=Array(String))
-    def say_hello(self, name, times):
-        results = []
-        for i in range(0, times):
-            results.append('Hello, %s' % name)
-        return results
-
-    @soap(String, Integer, _returns=Array(String))
-    def say_bye(self, name, times):
-        results = []
-        for i in range(0, times):
-            results.append('Bye, %s' % name)
-        return results
-    """
-
-    @soap(String, String, _returns=Array(String))
-    def spots_por_productos_anunciante(self, codigo_plaza, codigo_vehiculo):
+    @soap(String, String, String, String,
+          _returns=ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante)
+    def SpotsPorProductosAnunciante(
+            self, codigo_Plaza, codigo_Vehiculo, fechaDesde, fechaHasta):
         return "def SpotsPorProductosAnunciante"
 
-    @soap(Integer, DateTime, DateTime, Integer, String, Integer, Integer,
-          String, String, Integer, String, String, _returns=Array(String))
-    def EvaluacionSpotInfoCompletaPorProdAnunciante(self, Region, Fecha,
-            Minuto, CodigoTema, Tema, Duracion, Canal, Anunciante, Producto,
-            CodigoMaterial, Matrerial, LTargetRatingsInfo,
-            _returns=Array(String)):
-        return "def EvaluacionSpotInfoCompletaPorProdAnunciante"
-
-    @soap(Integer, _returns=Integer)
-    def EjemploDeMetodo(self, numero):
-        return (10 * numero)
-
-    @soap(_returns=Array(PaisSerializer))
-    def get_paises(self):
-        result = []
-        pais_serializer = PaisSerializer()
-        paises = models.Pais.objects.all()
-
-        for pais in paises:
-            pais_serializer.descripcion = pais.descripcion
-            pais_serializer.valor = pais.valor
-            result.append(pais_serializer)
-
-        return result
-
-    @soap(Integer, _returns=Array(String))
-    def get_pais(self, pais_id):
-        result = []
-        pais = models.Pais.objects.get(pk=pais_id)
-
-        result.append(pais.descripcion)
-        result.append(pais.valor)
-
-        return result
-
-    """
-    @soap(String,_returns=Boolean)
-    def xml(self,xml):
-        result = xml
+    @soap(SoapCredentials, _returns=Boolean)
+    def ValidaUsuario(self, s):
         return True
-
-    @soap(String,_returns=String)
-    def xml2(self,xml2):
-        return xml2
-    """
 
 
 class DjangoSoapApp(WSGIApplication):
@@ -93,10 +75,6 @@ class DjangoSoapApp(WSGIApplication):
     csrf_exempt = True
 
     def __init__(self, services, tns):
-        """
-        Create Django view for given SOAP soaplib services and
-        tns
-        """
         return super(DjangoSoapApp,
             self).__init__(Application(services, tns))
 
@@ -114,4 +92,4 @@ class DjangoSoapApp(WSGIApplication):
 
         return django_response
 
-my_soap_service = DjangoSoapApp([HelloWorldService], __name__)
+my_soap_service = DjangoSoapApp([SOAPService], __name__)
