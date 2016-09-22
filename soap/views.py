@@ -1,4 +1,6 @@
 
+from datetime import datetime
+
 from django.http import HttpResponse
 
 from soaplib.core import Application
@@ -7,6 +9,8 @@ from soaplib.core.model.primitive import (Boolean, DateTime, Double, Integer,
                                           String)
 from soaplib.core.server.wsgi import Application as WSGIApplication
 from soaplib.core.service import DefinitionBase, soap
+
+import models
 
 
 class SoapCredentials(ClassModel):
@@ -63,7 +67,35 @@ class SOAPService(DefinitionBase):
           _returns=ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante)
     def SpotsPorProductosAnunciante(
             self, codigo_Plaza, codigo_Vehiculo, fechaDesde, fechaHasta):
-        return "def SpotsPorProductosAnunciante"
+
+        emisiones = models.Emision.objects.all()
+        array_result = ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante()
+
+        array_result.EvaluacionSpotInfoCompletaPorProdAnunciante = []
+
+        for emision in emisiones:
+
+            fecha = datetime.strptime(str(emision.fecha), '%Y-%m-%d')
+            hora = datetime.strptime(str(emision.hora), '%H:%M:%S')
+
+            evaluacion_spot = EvaluacionSpotInfoCompletaPorProdAnunciante()
+            evaluacion_spot.Region = 1
+            evaluacion_spot.Fecha = fecha
+            evaluacion_spot.Minuto = hora
+            evaluacion_spot.CodigoTema = emision.id
+            evaluacion_spot.Tema = emision.titulo
+            evaluacion_spot.Duracion = emision.duracion
+            evaluacion_spot.Canal = 1
+            evaluacion_spot.Anunciante = emision.anunciantes.nombre
+            evaluacion_spot.Producto = emision.producto.nombre
+            evaluacion_spot.CodigoMaterial = emision.tipo_publicidad.id
+            evaluacion_spot.Material = "material"
+            evaluacion_spot.LTargetRatingsInfo = 0
+
+            array_result.EvaluacionSpotInfoCompletaPorProdAnunciante.append(
+                evaluacion_spot)
+
+        return array_result
 
     @soap(SoapCredentials, _returns=Boolean)
     def ValidaUsuario(self, s):
