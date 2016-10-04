@@ -71,7 +71,6 @@ class SOAPService(DefinitionBase):
             self, codigo_Plaza, codigo_Vehiculo, fechaDesde, fechaHasta):
 
         array_result = ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante()
-
         array_result.EvaluacionSpotInfoCompletaPorProdAnunciante = []
 
         if self.ValidaUsuario(self.in_header):
