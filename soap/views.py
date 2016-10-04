@@ -63,43 +63,50 @@ class SOAPService(DefinitionBase):
 
     __tns__ = '[url]http://12.0.0.1:8000/soap/wsdl[/url]'
 
+    __in_header__ = SoapCredentials
+
     @soap(String, String, String, String,
           _returns=ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante)
     def SpotsPorProductosAnunciante(
             self, codigo_Plaza, codigo_Vehiculo, fechaDesde, fechaHasta):
 
-        emisiones = models.Emision.objects.all()
         array_result = ArrayOfEvaluacionSpotInfoCompletaPorProdAnunciante()
 
         array_result.EvaluacionSpotInfoCompletaPorProdAnunciante = []
 
-        for emision in emisiones:
+        if self.ValidaUsuario(self.in_header):
 
-            fecha = datetime.strptime(str(emision.fecha), '%Y-%m-%d')
-            hora = datetime.strptime(str(emision.hora), '%H:%M:%S')
+            emisiones = models.Emision.objects.all()
 
-            evaluacion_spot = EvaluacionSpotInfoCompletaPorProdAnunciante()
-            evaluacion_spot.Region = 1
-            evaluacion_spot.Fecha = fecha
-            evaluacion_spot.Minuto = hora
-            evaluacion_spot.CodigoTema = emision.id
-            evaluacion_spot.Tema = emision.titulo
-            evaluacion_spot.Duracion = emision.duracion
-            evaluacion_spot.Canal = 1
-            evaluacion_spot.Anunciante = emision.anunciantes.nombre
-            evaluacion_spot.Producto = emision.producto.nombre
-            evaluacion_spot.CodigoMaterial = emision.tipo_publicidad.id
-            evaluacion_spot.Material = "material"
-            evaluacion_spot.LTargetRatingsInfo = 0
+            for emision in emisiones:
 
-            array_result.EvaluacionSpotInfoCompletaPorProdAnunciante.append(
-                evaluacion_spot)
+                fecha = datetime.strptime(str(emision.fecha), '%Y-%m-%d')
+                hora = datetime.strptime(str(emision.hora), '%H:%M:%S')
+
+                evaluacion_spot = EvaluacionSpotInfoCompletaPorProdAnunciante()
+                evaluacion_spot.Region = 1
+                evaluacion_spot.Fecha = fecha
+                evaluacion_spot.Minuto = hora
+                evaluacion_spot.CodigoTema = emision.id
+                evaluacion_spot.Tema = emision.titulo
+                evaluacion_spot.Duracion = emision.duracion
+                evaluacion_spot.Canal = 1
+                evaluacion_spot.Anunciante = emision.anunciantes.nombre
+                evaluacion_spot.Producto = emision.producto.nombre
+                evaluacion_spot.CodigoMaterial = emision.tipo_publicidad.id
+                evaluacion_spot.Material = "material"
+                evaluacion_spot.LTargetRatingsInfo = 0
+
+                array_result.EvaluacionSpotInfoCompletaPorProdAnunciante.append(
+                    evaluacion_spot)
 
         return array_result
 
     @soap(SoapCredentials, _returns=Boolean)
     def ValidaUsuario(self, s):
-        return True
+        if s.Cliente == "usuario1" and s.Password == "123456":
+            return True
+        return False
 
 
 class DjangoSoapApp(WSGIApplication):
